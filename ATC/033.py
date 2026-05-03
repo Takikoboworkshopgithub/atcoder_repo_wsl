@@ -1,0 +1,1 @@
+a,b=map(int,open(0).read().split());print(a//2*b//2)

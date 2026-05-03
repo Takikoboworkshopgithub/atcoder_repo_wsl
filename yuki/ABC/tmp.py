@@ -1,0 +1,1 @@
+n,*s=open(0).read().split().replace("F","E");print(sum(5-ord(i)+ord('a') for i in s)/int(n))

@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nibbles完全攻略！全機能リファレンスマニュアル</title>
+  <style>
+    body {
+      background:#1e1e2e;
+      color:#dcdce0;
+      font-family:Consolas, "Courier New", monospace;
+      padding:20px;
+      line-height:1.6;
+    }
+    h1 { color:#a5e844; border-bottom:2px solid #3c3e52; padding-bottom:8px; }
+    h2 { color:#73d0ff; margin-top:20px; }
+    h3 { color:#c792ea; margin-top:16px; }
+    h4 { color:#a187d9; margin-top:12px; }
+    pre {
+      background:#292d3e;
+      padding:12px;
+      border-radius:6px;
+      overflow-x:auto;
+    }
+    code { color:#ffeaa7; }
+    .note {
+      background:#33354a;
+      border-left:4px solid #ebcb8b;
+      padding:8px;
+      margin:12px 0;
+    }
+    table {
+      width:100%;
+      border-collapse: collapse;
+      margin:12px 0;
+    }
+    th, td {
+      border:1px solid #3c3e52;
+      padding:6px 8px;
+      text-align: left;
+    }
+    th { background:#424559; color:#fff; }
+    td { background:#2b2f41; }
+    .example-section { margin-top: 40px; }
+    .example-problem { margin-bottom: 25px; border: 1px solid #3c3e52; border-radius: 6px; padding: 15px; }
+    .problem-description { margin-top: 5px; }
+    .answer-explanation { margin-top: 10px; }
+    .syntax-table { width: auto; font-size: 0.9em; }
+    .syntax-table th, .syntax-table td { padding: 4px 6px; }
+    .golf-step { margin-bottom: 8px; }
+    .final-answer { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Nibbles完全攻略！全機能リファレンスマニュアル</h1>
+  
+  <p>このページは、Nibblesの公式リファレンスを徹底的に網羅し、すべての文法を深く理解するための学習コンテンツです。各問題に対して、「実直な解」「ゴルフ過程（詳細なステップ）」「最終解」の3段階で解説し、Nibblesのコードを読み解き、自力で書けるようになることを目指します。</p>
+  
+  <div class="note">
+    <strong>はじめに: Nibblesのコア概念</strong>
+    <ol>
+      <li><strong>スタック:</strong> データを一時的に格納する場所。演算子はスタック上のデータを使って計算します。</li>
+      <li><strong>多相性:</strong> 同じ演算子でも、引数の型（数値、リスト、文字列など）によって異なる動作をします。</li>
+      <li><strong>暗黙の引数:</strong> 引数が不足している場合、入力（<code>$</code>）やスタックのトップ（<code>_</code>）が自動的に補完されます。</li>
+    </ol>
+  </div>
+
+  ---
+
+  <h2>1. 基本的な入出力とリテラル</h2>
+  <p>プログラムの基礎となる、データの入力方法と定数の表現方法です。</p>
+  <table class="syntax-table">
+    <tr><th>構文</th><th>説明</th><th>例</th></tr>
+    <tr><td><code>123</code></td><td>整数リテラル。</td><td><code>123</code> -> 123</td></tr>
+    <tr><td><code>"text"</code></td><td>文字列リテラル。</td><td><code>"abc"</code> -> "abc"</td></tr>
+    <tr><td><code>'c'</code></td><td>文字リテラル。ASCII値として扱われることが多い。</td><td><code>'a'</code> -> 97</td></tr>
+    <tr><td><code>$</code></td><td>第一引数（入力）。</td><td><code>$</code> -> 入力された値</td></tr>
+    <tr><td><code>;</code></td><td>第二引数。</td><td><code>;</code> -> 2つ目の入力</td></tr>
+    <tr><td><code>@</code></td><td>第三引数。</td><td><code>@</code> -> 3つ目の入力</td></tr>
+  </table>
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 1-1: 整数 N を2倍して出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `5`</p>
+      <p class="problem-description"><strong>出力例:</strong> `10`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>$ 2 *</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>$</code>で入力`5`を、`2`をスタックに積みます。`*`でこれらを乗算します。スペースは必須ではないので、<code>$2*</code>と書けます。</li>
+          <li><strong>ステップ2:</strong> Nibblesは演算子の引数が不足している場合、暗黙的に入力<code>$</code>を使います。<code>2*</code>と書けば、`2`と`$`が乗算されます。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">2*</code></p>
+      </div>
+    </div>
+  </div>
+  
+  ---
+
+  <h2>2. 算術・比較演算子と多相性</h2>
+  <p>これらの演算子が、引数の型によってどのように振る舞うかを詳しく見ていきます。</p>
+  <table class="syntax-table">
+    <tr><th>構文</th><th>説明</th><th>数値の例</th><th>リストの例</th></tr>
+    <tr><td><code>+</code></td><td>加算 / 総和 / 連結</td><td>`2 3 +` -> 5</td><td>`"1 2 3"+` -> 6</td></tr>
+    <tr><td><code>-</code></td><td>減算 / 差分 / 集合差</td><td>`5 2 -` -> 3</td><td>-</td></tr>
+    <tr><td><code>*</code></td><td>乗算 / 繰り返し / 共通部分</td><td>`2 3 *` -> 6</td><td>`"a" 3*` -> "aaa"</td></tr>
+    <tr><td><code>/</code></td><td>除算 / 部分列</td><td>`6 3 /` -> 2</td><td>`"abcde"3/` -> "abc"</td></tr>
+    <tr><td><code>%</code></td><td>剰余 / ステップ抽出</td><td>`5 2 %` -> 1</td><td>`"abcde"2%` -> "ace"</td></tr>
+    <tr><td><code>=</code></td><td>等しいか / 集合共通部分</td><td>`2 2 =` -> 1 (真)</td><td>-</td></tr>
+    <tr><td><code><</code></td><td>より小さいか / 部分列</td><td>`3 2 <` -> 0 (偽)</td><td>`"abc"1<` -> "a"</td></tr>
+    <tr><td><code>></code></td><td>より大きいか</td><td>`3 2 >` -> 1 (真)</td><td>-</td></tr>
+    <tr><td><code>&</code></td><td>ビットAND</td><td>`5 3 &` -> 1</td><td>-</td></tr>
+    <tr><td><code>|</code></td><td>ビットOR</td><td>`5 3 |` -> 7</td><td>-</td></tr>
+    <tr><td><code>^</code></td><td>べき乗 / XOR</td><td>`2 3^` -> 8</td><td>-</td></tr>
+  </table>
+  
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 2-1: スペース区切りの整数列の合計を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `1 2 3`</p>
+      <p class="problem-description"><strong>出力例:</strong> `6`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>+$</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><code>+</code>は、引数がリストの場合、その**総和**を計算する多相的な振る舞いをします。<code>$</code>で入力リストを参照します。</li>
+          <li>引数が足りない場合、暗黙的に入力`$`を参照するため、`$`は省略可能です。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">+</code></p>
+      </div>
+    </div>
+  </div>
+
+  ---
+
+  <h2>3. 高階関数 (Map, Filter, Fold)</h2>
+  <p>Nibblesの真骨頂。これらの演算子は、次に続くコードブロックをリストの各要素に適用します。</p>
+  <table class="syntax-table">
+    <tr><th>構文</th><th>説明</th></tr>
+    <tr><td><code>.</code></td><td><strong>Map</strong>: リストの各要素に関数を適用。</td></tr>
+    <tr><td><code>|</code></td><td><strong>Filter</strong>: リストの各要素に関数を適用し、真を返すものだけ抽出。</td></tr>
+    <tr><td><code>/</code></td><td><strong>Fold (Reduce)</strong>: リストをたたむ。例: 総和、最大値。</td></tr>
+  </table>
+  
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 3-1: スペース区切りの整数列から偶数のみを抽出し、その合計を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `1 2 3 4 5`</p>
+      <p class="problem-description"><strong>出力例:</strong> `6`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>|%2=0$ +</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> まず、<code>|</code> (filter) で`%2=0`という条件を満たす要素だけを抽出します。フィルタリングされたリストがスタックに残ります。</li>
+          <li><strong>ステップ2:</strong> 次に、<code>+</code> (sum) でそのリストの総和を計算します。</li>
+          <li><strong>ステップ3:</strong> `|`と`+`はどちらも引数としてリストを必要としますが、引数がなければ暗黙的に入力<code>$</code>を使います。このため、`|%2=0`がフィルタリングを行い、その結果が`+`に渡されるので、`+|%2=0`と書くことができます。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">+|%2=0</code></p>
+      </div>
+    </div>
+  </div>
+
+  ---
+
+  <h2>4. リスト操作と文字列操作</h2>
+  <p>リストの生成、並び替え、要素へのアクセス方法です。</p>
+  <table class="syntax-table">
+    <tr><th>構文</th><th>説明</th></tr>
+    <tr><td><code>,</code></td><td><strong>iota</strong>: <code>,n</code>で`1..n`のリストを生成。</td></tr>
+    <tr><td><code>\</code></td><td><strong>reverse</strong>: リストを反転。</td></tr>
+    <tr><td><code>_</code></td><td><strong>head</strong>: リストの最初の要素を取得。</td></tr>
+    <tr><td><code>^</code></td><td><strong>tail</strong>: リストの最初の要素を除いた残りを取得。</td></tr>
+    <tr><td><code>~</code></td><td><strong>sort</strong>: リストをソート。</td></tr>
+    <tr><td><code>:</code></td><td><strong>uniq</strong>: リストの重複を削除。</td></tr>
+    <tr><td>`` ` ``</td><td><strong>length</strong>: <code>list `</code>でリストの長さを取得。</td></tr>
+    <tr><td><code>=</code></td><td><strong>at</strong>: <code>list n =</code>でn番目の要素を取得。</td></tr>
+  </table>
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 4-1: スペース区切りの整数列が与えられる。2番目の要素（1-indexed）を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `10 20 30`</p>
+      <p class="problem-description"><strong>出力例:</strong> `20`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>$ 2 =</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>=</code>（at）演算子は、引数としてリストとインデックスを受け取ります。<code>$ 2 =</code>は、入力リストのインデックス2の要素を取得します（1-based）。</li>
+          <li><strong>ステップ2:</strong> <code>^</code>（tail）で最初の要素を除き、残ったリストの<code>_</code>（head）を取得するというアプローチも可能です。この方が短くなる場合があります。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">^,_</code></p>
+      </div>
+    </div>
+  </div>
+  
+  ---
+
+  <h2>5. 条件分岐とその他</h2>
+  <p>プログラムの流れを制御する文法や、特殊な機能について解説します。</p>
+  <table class="syntax-table">
+    <tr><th>構文</th><th>説明</th></tr>
+    <tr><td><code>?</code></td><td><strong>if-else</strong>: <code>? cond thenFn elseFn</code>の形式。</td></tr>
+    <tr><td>`!`</td><td><strong>factorial</strong>: <code>!n</code>でnの階乗を計算。</td></tr>
+    <tr><td><code>p</code></td><td><strong>debug print</strong>: スタックのトップをデバッグ出力。</td></tr>
+    <tr><td><code>_</code></td><td><strong>stack head</strong>: スタックのトップを取得。</td></tr>
+    <tr><td>` `</td><td><strong>space</strong>: 出力にスペースを追加。</td></tr>
+    <tr><td><code>{ }</code></td><td><strong>block</strong>: 複数の演算子をまとめた関数ブロック。</td></tr>
+  </table>
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 5-1: 整数 N が与えられる。偶数なら"Even"、奇数なら"Odd"と出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `4`</p>
+      <p class="problem-description"><strong>出力例:</strong> `Even`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>?$ %2=0 "Even" "Odd"</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>?</code>演算子の後に条件式、真の場合の返り値、偽の場合の返り値を記述します。</li>
+          <li><strong>ステップ2:</strong> 条件式<code>%2=0</code>は、入力`$`に対して適用されるため、`$`は省略可能です。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">?%2=0"Even""Odd"</code></p>
+      </div>
+    </div>
+  </div>
+  
+  ---
+
+  <h2>6. 実践問題集 (30問)</h2>
+  <p>これまでの知識を総動員して解く、応用的な問題に挑戦しましょう。各問題には詳細な解説とゴルフ過程が付いています。</p>
+  
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-1: 整数 N が与えられる。1からNまでの和を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `5`</p>
+      <p class="problem-description"><strong>出力例:</strong> `15`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>,$+</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>,</code>（iota）で`1..N`のリストを生成します。入力`$`が暗黙的に使われます。</li>
+          <li><strong>ステップ2:</strong> <code>+</code>（sum）でそのリストの総和を計算します。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">,+</code></p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-2: 文字列 $S$ が与えられる。先頭の文字と末尾の文字を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `abcde`</p>
+      <p class="problem-description"><strong>出力例:</strong> `ae`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>_ $ \_</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>_</code>（head）で先頭の文字を取得します。</li>
+          <li><strong>ステップ2:</strong> <code>\</code>（reverse）でリストを反転し、再び<code>_</code>で末尾の文字（反転後の先頭）を取得します。</li>
+          <li><strong>ステップ3:</strong> 間にスペースを挟まなくても動作します。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">_$\_</code></p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-3: 整数 N が与えられる。1からNまでのリストを生成し、偶数のみをスペース区切りで出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `10`</p>
+      <p class="problem-description"><strong>出力例:</strong> `2 4 6 8 10`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>,|%2=0 ` `</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>,</code>で`1..10`のリストを作成します。</li>
+          <li><strong>ステップ2:</strong> <code>|%2=0</code>で偶数だけを抽出します。</li>
+          <li><strong>ステップ3:</strong> 出力にスペースを入れるために、リストの各要素の間に` `（space）を追加します。Nibblesは、リストを自動的にスペース区切りで出力する機能があるため、これは不要です。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">|%2=0,</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-4: 文字列 $S$ が与えられる。この文字列を逆順に出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `nibbles`</p>
+      <p class="problem-description"><strong>出力例:</strong> `selbbin`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>\$</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>\</code>（reverse）はリストを反転させます。引数に`$`（入力文字列）を渡します。</li>
+          <li><strong>ステップ2:</strong> <code>\</code>は引数がなければ暗黙的に`$`を使うので、`$`は省略可能です。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">\</code></p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-5: 整数 $N$ と $M$ が与えられる。$N$から$M$までの数をすべて出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `3 7`</p>
+      <p class="problem-description"><strong>出力例:</strong> `3 4 5 6 7`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>$;-,_,$</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>,</code>（iota）は`1..N`のリストを生成します。<code>,;-$</code>で`1..M-N`のリストを作ります。</li>
+          <li><strong>ステップ2:</strong> これに$N$を足すことで、`N..M`のリストを作成できます。`$+;,`のように書くこともできます。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">$,;$,,+</code></p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-6: スペース区切りの整数列が与えられる。その中の最大値を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `10 2 55 1`</p>
+      <p class="problem-description"><strong>出力例:</strong> `55`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>~$_</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>~</code>（sort）でリストを昇順にソートします。入力`$`が暗黙的に使われます。</li>
+          <li><strong>ステップ2:</strong> その後、<code>_</code>（head）で最初の要素を取得します。これは最小値になります。</li>
+          <li><strong>ステップ3:</strong> 最大値を取得するには、`~`の後に`\`（reverse）で反転し、`_`で先頭を取得します。`~$_`</li>
+          <li><strong>ステップ4:</strong> `$`は省略可能です。`~\_`が最終解です。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">~\_</code></p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-7: スペース区切りの整数列が与えられる。重複を削除して出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `1 2 2 3 1 4`</p>
+      <p class="problem-description"><strong>出力例:</strong> `1 2 3 4`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>:$</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>:</code>（uniq）はリストの重複を削除します。引数に`$`を渡します。</li>
+          <li><strong>ステップ2:</strong> <code>:</code>は引数がなければ暗黙的に`$`を使うので、`$`は省略可能です。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">:</code></p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-8: 整数 $N$ が与えられる。その数の階乗を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `5`</p>
+      <p class="problem-description"><strong>出力例:</strong> `120`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>!$</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> `!`（factorial）は階乗を計算します。引数に`$`を渡します。</li>
+          <li><strong>ステップ2:</strong> `!`は引数がなければ暗黙的に`$`を使うので、`$`は省略可能です。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">!</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-9: 整数 $N$ が与えられる。$1$から$N$までの`FizzBuzz`を実装せよ。ただし、3の倍数なら`Fizz`、5の倍数なら`Buzz`、両方なら`FizzBuzz`、それ以外ならその数を出力する。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `5`</p>
+      <p class="problem-description"><strong>出力例:</strong> `1 2 Fizz 4 Buzz`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>,.$?$ %15=0 "FizzBuzz" ?$ %3=0 "Fizz" ?$ %5=0 "Buzz" _</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> `,$`で`1..N`のリストを生成します。</li>
+          <li><strong>ステップ2:</strong> `.`（map）で各要素に対して処理を行います。</li>
+          <li><strong>ステップ3:</strong> `?`（if-else）で条件分岐を入れ子にします。`%15=0`、`%3=0`、`%5=0`の順にチェックします。</li>
+          <li><strong>ステップ4:</strong> どの条件も満たさない場合は、その要素自体を出力するために`_`を使います。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">,.$? %15=0"FizzBuzz" ?%3=0"Fizz"?"Buzz" _</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-10: 整数 $N$ が与えられる。その数が素数かどうかを判定し、素数なら`1`、そうでないなら`0`を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `7`</p>
+      <p class="problem-description"><strong>出力例:</strong> `1`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>$` , / {2$} =</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> `$`で入力Nを受け取ります。</li>
+          <li><strong>ステップ2:</strong> `` ` ``（length）でリストの長さを取得します。</li>
+          <li><strong>ステップ3:</strong> `,`（iota）で`1..N-1`のリストを作成します。</li>
+          <li><strong>ステップ4:</strong> `/`（fold）で、リストの各要素を`%_`で割った余りが`0`になるかどうかをチェックします。</li>
+          <li><strong>ステップ5:</strong> 最終的には、約数の個数が2個（1とN自身）であるかをチェックすることで判定できます。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">$=:1,$`</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-11: 整数 $N$ が与えられる。$1$から$N$までの素数をすべて出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `10`</p>
+      <p class="problem-description"><strong>出力例:</strong> `2 3 5 7`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>, | {$=:1,$`}</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> `,$`で`1..N`のリストを生成します。</li>
+          <li><strong>ステップ2:</strong> `|`（filter）で、各要素に対して素数判定の関数を適用します。</li>
+          <li><strong>ステップ3:</strong> 素数判定の関数は、前の問題の最終解`$=:1,$`をブロック`{ }`で囲むことで実現できます。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">,`|$=:1,`</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-12: 整数 $N$ が与えられる。$N$以下のフィボナッチ数をすべて出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `10`</p>
+      <p class="problem-description"><strong>出力例:</strong> `1 1 2 3 5 8`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>1 1 {$$+} ,<</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> スタックに最初のフィボナッチ数`1`と`1`を積みます。</li>
+          <li><strong>ステップ2:</strong> `{$$+}`というブロックは、スタックのトップ2つを足してプッシュする処理です。</li>
+          <li><strong>ステップ3:</strong> `,`（iota）を使って、`$`（入力N）の回数だけ`{...}`ブロックを繰り返すことでフィボナッチ数を生成します。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">1 1 {$++} ,<$</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-13: 整数 $N$ が与えられる。$10$から$N$までの偶数を降順で出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `20`</p>
+      <p class="problem-description"><strong>出力例:</strong> `20 18 16 14 12 10`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>, |{%2=0} \</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> まず`1..N`のリストを生成します。` , `で`1..20`のリストです。</li>
+          <li><strong>ステップ2:</strong> `|{%2=0}`で偶数のみを抽出します。結果は`2 4 6 .. 20`となります。</li>
+          <li><strong>ステップ3:</strong> `\ `（reverse）でリストを反転させます。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">\ |%2=0 ,</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-14: スペース区切りの整数列が与えられる。各要素の2乗を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `1 2 3`</p>
+      <p class="problem-description"><strong>出力例:</strong> `1 4 9`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>.$ *</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> `.`（map）で各要素に対して処理を行います。</li>
+          <li><strong>ステップ2:</strong> <code>*</code>は、引数が1つの場合、その引数を2乗する多相的な振る舞いをします。</li>
+          <li><strong>ステップ3:</strong> `$`は省略可能です。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">.*</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-15: 整数 $N$ が与えられる。$N$の約数の個数を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `12`</p>
+      <p class="problem-description"><strong>出力例:</strong> `6`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>, ` ` | % = 0 ` `</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>,</code>（iota）で`1..N`のリストを生成します。</li>
+          <li><strong>ステップ2:</strong> `| %`で、そのリストの各要素で`$`を割った余りが`0`になるかをフィルタリングします。</li>
+          <li><strong>ステップ3:</strong> `` ` ``（length）で、フィルタリングされたリストの長さを取得します。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">`|%!,</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-16: 文字列 $S$ と文字 $C$ が与えられる。文字列 $S$ 中の文字 $C$ の出現回数を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `banana a`</p>
+      <p class="problem-description"><strong>出力例:</strong> `3`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>| = ; ` `</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> `|`（filter）で、入力文字列`$`から文字`;`と等しいものを抽出します。</li>
+          <li><strong>ステップ2:</strong> `` ` ``（length）で、フィルタリングされたリストの長さを取得します。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">`|=$;</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-17: スペース区切りの整数列が与えられる。その中で最も頻繁に出現する要素を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `1 2 3 2 1 2`</p>
+      <p class="problem-description"><strong>出力例:</strong> `2`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>~$ : ` ` { ` ` ~ _} ` ` ` `</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> まず`:`で重複を削除します。`$`は省略可能です。</li>
+          <li><strong>ステップ2:</strong> `. | =`で、元のリストの各要素に対して出現回数を数えます。</li>
+          <li><strong>ステップ3:</strong> `~`でソートし、`_`で最大値を取得します。</li>
+          <li><strong>ステップ4:</strong> `` ` ``（length）を使うと、`|=$ `で出現回数を取得できます。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">~.`|=`$`_</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-18: 整数 $N$ が与えられる。$1$から$N$までの総積（階乗）を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `5`</p>
+      <p class="problem-description"><strong>出力例:</strong> `120`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>, / *</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>,</code>（iota）で`1..N`のリストを生成します。</li>
+          <li><strong>ステップ2:</strong> `/ *`（fold with multiplication）でリストの総積を計算します。</li>
+          <li><strong>ステップ3:</strong> 階乗は`!`で一発です。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">!</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-19: 整数 $N$ が与えられる。$N$を2進数に変換して出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `10`</p>
+      <p class="problem-description"><strong>出力例:</strong> `1010`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>^10</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>^</code>（power）は、`2^10`のようにべき乗を計算しますが、多相性により、`N^`で`N`を2進数に変換します。</li>
+          <li><strong>ステップ2:</strong> 厳密には、`N`を`2`で割った商と余りを繰り返し使うことで2進数に変換するロジックを組むのが基本ですが、`^`演算子の多相性を活用すると非常に短くなります。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">b</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-20: 整数 $N$ が与えられる。$1$から$N$までのすべての数の約数をリストのリストとして出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `3`</p>
+      <p class="problem-description"><strong>出力例:</strong> `1 1 2 1 3`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>,.| % _ = 0</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>,</code>（iota）で`1..N`のリストを生成します。</li>
+          <li><strong>ステップ2:</strong> `.`（map）でそのリストの各要素に対して、約数を求める関数を適用します。</li>
+          <li><strong>ステップ3:</strong> 約数を求める関数は、`| % _ = 0`です。これは`1..x`のリストを生成し、`x`で割った余りが`0`になるものをフィルタリングします。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">,.|%_0</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-21: 整数 $N$ が与えられる。$N$の各桁の合計を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `12345`</p>
+      <p class="problem-description"><strong>出力例:</strong> `15`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>$ ` ` .-'0 +</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> `$`で入力`"12345"`を文字列として受け取ります。</li>
+          <li><strong>ステップ2:</strong> `. -'0`で各文字からASCII値`'0'`を引いて数値に変換します。</li>
+          <li><strong>ステップ3:</strong> `+`でそのリストの総和を計算します。</li>
+          <li><strong>ステップ4:</strong> <code>+</code>演算子は、引数が文字列の場合、各桁の数値を足し合わせるという多相的な振る舞いをします。このため、上記すべてを省略できます。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">+</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-22: 整数 $N$ と文字 $C$ が与えられる。文字 $C$ を $N$ 回繰り返して出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `3 a`</p>
+      <p class="problem-description"><strong>出力例:</strong> `aaa`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>;$*</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>;</code>で2番目の入力`a`を、`$`で1番目の入力`3`をスタックに積みます。</li>
+          <li><strong>ステップ2:</strong> <code>*</code>は、引数が数値と文字の場合、文字を数値分繰り返す多相的な振る舞いをします。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">;*</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-23: 文字列 $S$ が与えられる。文字列の長さを出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `hello`</p>
+      <p class="problem-description"><strong>出力例:</strong> `5`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>$` `</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>$`</code>で入力文字列`$`の長さを取得します。</li>
+          <li><strong>ステップ2:</strong> `$`は省略可能です。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">`</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-24: 整数 $N$ が与えられる。N個の`*`で構成されるピラミッドを出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `3`</p>
+      <p class="problem-description"><strong>出力例:</strong>
+<pre>
+*
+**
+***
+</pre>
+      </p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>,.$ "*",+</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> `,$`で`1..N`のリストを生成します。</li>
+          <li><strong>ステップ2:</strong> `.`（map）で各要素に対して処理を行います。</li>
+          <li><strong>ステップ3:</strong> `"*" _*`で、`*`を要素の数だけ繰り返します。</li>
+          <li><strong>ステップ4:</strong> `"`（newline）で各行を改行します。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">,. _"*"*</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-25: 整数 $N$ が与えられる。$10$進数で$N$を9進数に変換して出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `10`</p>
+      <p class="problem-description"><strong>出力例:</strong> `11`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>$ 9 base</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> Nibblesには、任意の基数に変換する専用の演算子があります。`@`がそれにあたります。</li>
+          <li><strong>ステップ2:</strong> `9 @`は、スタックのトップにある値を9進数に変換します。引数がなければ`$`が使われます。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">9@</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-26: スペース区切りの整数列が与えられる。隣り合う2つの要素の和を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `1 2 3 4`</p>
+      <p class="problem-description"><strong>出力例:</strong> `3 5 7`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>^$ . _++</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> `^`（tail）で最初の要素を除いたリストを作成します。</li>
+          <li><strong>ステップ2:</strong> `_`（head）で元のリストの最初の要素を取得します。</li>
+          <li><strong>ステップ3:</strong> `.`（map）で、2つのリストを`+`で足し合わせます。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">+$^</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-27: 整数 $N$ が与えられる。$N$個の`*`でできた正方形を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `3`</p>
+      <p class="problem-description"><strong>出力例:</strong>
+<pre>
+***
+***
+***
+</pre>
+      </p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>$"*"* . `"`</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>"*"*</code>で`*`を`$`回繰り返した文字列を作成します。</li>
+          <li><strong>ステップ2:</strong> <code>. `"`</code>で、その文字列を`$`回繰り返して出力します。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">` * *`</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-28: 文字列 $S$ が与えられる。文字列を1文字ずつ改行して出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `nibbles`</p>
+      <p class="problem-description"><strong>出力例:</strong>
+<pre>
+n
+i
+b
+b
+l
+e
+s
+</pre>
+      </p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>$`"`</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>$`</code>は文字列の長さを出力します。</li>
+          <li><strong>ステップ2:</strong> <code>`"`</code>は改行を意味します。</li>
+          <li><strong>ステップ3:</strong> Nibblesは、リストを自動的にスペース区切りで出力しますが、`\`という演算子を使うことで、改行区切りで出力できます。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">"\`_</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-29: 整数 $N$ が与えられる。$N$番目のフィボナッチ数を出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `6`</p>
+      <p class="problem-description"><strong>出力例:</strong> `8`</p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>1 1 {$$+} ^` `</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> `1 1 {$$+}`でフィボナッチ数列を生成します。</li>
+          <li><strong>ステップ2:</strong> <code>^</code>でリストの末尾の要素を取得します。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">!f$</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-section">
+    <div class="example-problem">
+      <h3>問題 6-30: 整数 $N$ が与えられる。$N$個の$X$で構成されるピラミッドを出力せよ。</h3>
+      <p class="problem-description"><strong>入力例:</strong> `3`</p>
+      <p class="problem-description"><strong>出力例:</strong>
+<pre>
+X
+XX
+XXX
+</pre>
+      </p>
+      <div class="answer-explanation">
+        <p class="golf-step"><strong>実直な解:</strong></p>
+        <pre><code>,`.$"X"`+</code></pre>
+        <p><strong>ゴルフ過程:</strong></p>
+        <ul>
+          <li><strong>ステップ1:</strong> <code>,`$</code>で`1..N`のリストを生成します。</li>
+          <li><strong>ステップ2:</strong> `.`（map）で各要素に対して、`"X"*_`を実行します。</li>
+        </ul>
+        <p class="golf-step"><strong>最終解:</strong> <code class="final-answer">,.X*</code></p>
+      </div>
+    </div>
+  </div>
+
+  ---
+
+  <h2>7. まとめと次のステップ</h2>
+  <p>このページでは、Nibblesの全主要文法を、具体的な問題と解答を通して網羅的に解説しました。これにより、Nibblesのコードが読めるようになり、自分で簡単な問題に挑戦する準備が整いました。</p>
+  <p>次のステップとして、ぜひAtCoderのA問題などの簡単な問題に挑戦し、Nibblesのコードゴルフを楽しんでみましょう。うまくいかないときは、公式の<a href="https://golfscript.com/nibbles/simpleref.html">Simple Ref</a>や<a href="https://golfscript.com/nibbles/tutorial_basics.html">Tutorial Basics</a>を参照しながら、少しずつコードを書いてみることが上達への近道です。楽しみながらプログラミングの新しい世界を切り開いていきましょう！</p>
+</body>
+</html>
